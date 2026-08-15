@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STP benchmark data</title>
+<meta name="description" content="Raw results, binaries and harness for STP's benchmark campaigns.">
+<style>
+  :root { color-scheme: light dark; }
+  body { max-width: 46rem; margin: 3rem auto; padding: 0 1.25rem;
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif; }
+  h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.1rem; margin-top: 2rem; }
+  .lede { color: #666; margin-top: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { text-align: left; padding: .4rem .6rem; border-bottom: 1px solid #ddd;
+           vertical-align: top; }
+  th { font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+         font-size: .9em; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #16181c; color: #ddd; }
+    .lede { color: #999; }
+    th, td { border-bottom-color: #333; }
+    a { color: #7bb0ff; }
+  }
+</style>
+</head>
+<body>
+
+<h1>STP benchmark data</h1>
+<p class="lede">Raw results, binaries and harness behind
+<a href="https://stp.github.io/stp/benchmarks.html">STP's benchmark pages</a>.</p>
+
+<p>This site exists to be fetched rather than read: the pages in
+<a href="https://stp.github.io/stp/">STP's manual</a> load their figures from
+the JSON below. What is here that the pages do not show is the per-run data,
+the retained solver output, and the exact binary each campaign was run with.</p>
+
+<h2>Files</h2>
+<table>
+  <tr><th>Path</th><th>What</th></tr>
+  <tr><td><a href="data/campaigns.json"><code>data/campaigns.json</code></a></td>
+      <td>One entry per campaign: provenance and headline figures. Start here — it names the rest.</td></tr>
+  <tr><td><code>data/summary/&lt;campaign&gt;.json</code></td>
+      <td>Per-logic and per-family aggregates.</td></tr>
+  <tr><td><code>data/failures/&lt;campaign&gt;.json</code></td>
+      <td>Every instance the campaign did not solve, and why.</td></tr>
+  <tr><td><code>data/detail/&lt;campaign&gt;.json.gz</code></td>
+      <td>Per-file class, wall time and peak RSS.</td></tr>
+  <tr><td><code>data/runs/&lt;campaign&gt;.jsonl.gz</code></td>
+      <td>Every column of every run — the archival form.</td></tr>
+  <tr><td><a href="data/corpus.jsonl.gz"><code>data/corpus.jsonl.gz</code></a></td>
+      <td>The benchmark index the runs are keyed to: sha256, size, query count, declared status.</td></tr>
+  <tr><td><code>outputs/&lt;campaign&gt;.jsonl.gz</code></td>
+      <td>Each run's stdout and stderr.</td></tr>
+  <tr><td><code>binaries/&lt;sha256&gt;.stp</code></td>
+      <td>The statically linked binary that produced a campaign, beside a JSON of its provenance.</td></tr>
+</table>
+
+<p>The <code>.jsonl.gz</code> files are a header line naming the columns, then
+one compact JSON array per row.</p>
+
+<h2>Repository</h2>
+<p><a href="https://github.com/stp/benchmarks-data">github.com/stp/benchmarks-data</a>
+holds all of this plus <code>scripts/</code>, the harness that runs a campaign
+and publishes it. Its README covers how a campaign is reproduced, what is
+excluded from publication and why, and the one place the data is known to be
+incomplete.</p>
+
+</body>
+</html>

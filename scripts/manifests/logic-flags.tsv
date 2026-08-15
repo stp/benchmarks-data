@@ -1,0 +1,9 @@
+# Per-logic solver flags. <logic><TAB><flags>
+#
+# --array-equality is not optional for the array logics: without it STP refuses
+# whole-array equality and roughly 30% of QF_ABV errors out silently, which a
+# harness reads as a solver failure rather than a missing flag.
+QF_ABV	--array-equality
+QF_AUFBV	--array-equality
+QF_ABVFP	--array-equality
+QF_ABVFPLRA	--array-equality
