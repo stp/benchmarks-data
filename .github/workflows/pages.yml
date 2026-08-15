@@ -11,6 +11,10 @@ name: Publish data
 on:
   push:
     branches: [master]
+  # Check (but do not deploy) on PRs. The consistency check below is the only
+  # thing standing between a half-published campaign and a live 404, and it is
+  # worth more before a merge than after one.
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -23,23 +27,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  check:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
 
       # A campaign's data must arrive whole or not at all: the website reads
       # campaigns.json first and then fetches the files it names, so a partial
-      # deploy shows a campaign whose summary 404s.
+      # publish shows a campaign whose summary 404s.
       - name: Check every campaign the index names has its files
         run: python3 scripts/check-published.py
 
       - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
         with:
           path: .
 
+  deploy:
+    needs: check
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
