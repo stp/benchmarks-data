@@ -71,9 +71,15 @@ From a checkout, with the working store on the same machine:
 
 ```bash
 ./scripts/publish.py            # export, scrub, repair, verify
+git checkout -b publish-<name>
 git add -A && git commit -m "Publish campaign <name>"
-git push
+git push -u origin publish-<name> && gh pr create
 ```
+
+Campaigns land through a pull request like anything else. Publishing is
+routine, but it is the step that puts numbers in front of people, and a diff is
+the last chance to notice that a campaign is half-finished or that a mismatch
+went unremarked.
 
 `publish.py` runs `export.py`, copies in the binary after checking its hash
 against the one the campaign recorded, and repairs and re-keys the output log.
@@ -111,6 +117,24 @@ them without re-running.
 Both faults behind that are fixed in `scripts/`: the log is repaired before
 anything appends to it, it is flushed on the same boundary as the database
 commit, and the per-run key no longer restarts at zero when a campaign resumes.
+
+## Licences
+
+What is written here — the harness, the exported results, this documentation —
+is MIT, per `LICENSE`.
+
+The **published binaries are a different matter**. Each is a statically linked
+STP, so it embeds the third-party code STP is built from, and redistributing it
+carries those licences whatever this repository's own says. They are listed,
+with their full text, in
+[`LICENSE_COMPONENTS`](https://github.com/stp/stp/blob/master/LICENSE_COMPONENTS)
+in the STP source repository: ABC, mimalloc, Bit::Vector, the CVC SMT-LIB
+parser, `ankerl::unordered_dense`, CLI11, and — depending on how the binary was
+configured — SymFPU and LibBF.
+
+The SAT backend is linked at build time and so is not in that list. Which one a
+given binary carries, and at which commit, is recorded in its
+`binaries/<sha256>.json`; CaDiCaL and CryptoMiniSat are both MIT.
 
 ## The harness
 
