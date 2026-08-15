@@ -218,8 +218,7 @@ before appending to it, so the damage cannot compound; the repair is also what
 
 The published log is keyed by benchmark path, not by the DB's `output_offset`.
 That counter used to restart at zero in each process, so a resumed campaign
-numbered two different records `0` — see the README's note on `full-001`, which
-was recorded that way.
+numbered two different records `0`; `full-001` was recorded that way.
 
 ## Resuming
 

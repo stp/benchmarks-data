@@ -119,25 +119,6 @@ that has since moved on.
 The website updates when this repo's Pages build finishes. Nothing in `stp/stp`
 has to change.
 
-## Known data damage
-
-**`outputs/full-001.jsonl.gz` holds 154,519 of that campaign's 160,610 runs.**
-A reboot interrupted the campaign at run 63,533; the output log was being
-appended to as a gzip stream, and the kill left an unterminated member with the
-resumed run's records appended after it. Walking the members recovers all but
-about 6,000 records — the ones still in the compressor's buffer when the
-machine went down. The published file has been repaired into a single clean
-member, so `zcat` reads it through.
-
-The results themselves are unaffected: they were committed to the database as
-each run finished, and the campaign resumed and completed. Only the retained
-stdout of those ~6,000 runs is gone, which costs the ability to re-triage
-them without re-running.
-
-Both faults behind that are fixed in `scripts/`: the log is repaired before
-anything appends to it, it is flushed on the same boundary as the database
-commit, and the per-run key no longer restarts at zero when a campaign resumes.
-
 ## Licences
 
 What is written here — the harness, the exported results, this documentation —
