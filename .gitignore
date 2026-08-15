@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+
+# Campaign binaries are attached to releases, not committed.
+binaries/*.stp

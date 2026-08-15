@@ -1,0 +1,45 @@
+name: Publish data
+
+# Serves this repo at https://stp.github.io/benchmarks-data/, which is where
+# the benchmark pages in the manual (stp/stp, docs/benchmarks.rst) fetch from.
+# Both are project sites under stp.github.io, so that fetch is same-origin and
+# needs no CORS handling.
+#
+# The repo is published as-is: there is nothing to build, and the raw data
+# being reachable at a stable URL is the point of it.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # A campaign's data must arrive whole or not at all: the website reads
+      # campaigns.json first and then fetches the files it names, so a partial
+      # deploy shows a campaign whose summary 404s.
+      - name: Check every campaign the index names has its files
+        run: python3 scripts/check-published.py
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,11 @@
+# Known STP capability gaps, matched against solver stdout/stderr.
+# <substring><TAB><reason>
+#
+# A file matching one of these is classed 'unsupported' rather than 'error':
+# it is a documented limit of STP, not a failure of the run. Raw output is
+# always retained, so anything mis-triaged here can be re-classified later
+# without re-running the campaign.
+unexpected ARRAY_TOK, expecting UNDERSCORE_TOK	nested (Array (Array ...)) sorts
+unexpected BOOL_TOK	Bool-sorted array component
+Wrong input logic	logic not in STP's set-logic whitelist
+cannot decide equality between whole array terms	needs --array-equality
