@@ -55,9 +55,15 @@ the retained solver output, and the exact binary each campaign was run with.</p>
       <td>The benchmark index the runs are keyed to: sha256, size, query count, declared status.</td></tr>
   <tr><td><code>outputs/&lt;campaign&gt;.jsonl.gz</code></td>
       <td>Each run's stdout and stderr.</td></tr>
-  <tr><td><code>binaries/&lt;sha256&gt;.stp</code></td>
-      <td>The statically linked binary that produced a campaign, beside a JSON of its provenance.</td></tr>
+  <tr><td><code>binaries/&lt;sha256&gt;.json</code></td>
+      <td>Provenance of the binary that produced a campaign — STP commit, compiler, linked SAT solvers — and the <code>download_url</code> to fetch it from.</td></tr>
 </table>
+
+<p>The binaries themselves are
+<a href="https://github.com/stp/benchmarks-data/releases">releases</a>, one per
+distinct binary, tagged <code>binary-&lt;first 12 of its sha256&gt;</code>.
+Check what you download against that hash before trusting a measurement made
+with it.</p>
 
 <p>The <code>.jsonl.gz</code> files are a header line naming the columns, then
 one compact JSON array per row.</p>

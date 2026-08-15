@@ -25,12 +25,19 @@ appear on the website without a commit to STP itself.
 | `data/runs/<c>.jsonl.gz` | **every column of every run** — the archival form |
 | `data/corpus.jsonl.gz` | the benchmark index the runs are keyed to |
 | `outputs/<c>.jsonl.gz` | each run's stdout and stderr |
-| `binaries/<sha256>.stp` | the statically linked binary that produced a campaign |
-| `binaries/<sha256>.json` | its provenance: STP commit, compiler, linked SAT solvers |
+| `binaries/<sha256>.json` | provenance of the binary that produced a campaign: STP commit, compiler, linked SAT solvers, and the release to download it from |
 | `scripts/` | the harness: run a campaign, export it, publish it |
 
 `data/` is what the website reads. `runs/`, `corpus.jsonl.gz` and `outputs/`
 are for anyone who wants to check a number rather than look at it.
+
+The **binaries themselves are [releases](https://github.com/stp/benchmarks-data/releases)**,
+one per distinct binary, tagged `binary-<first 12 of its sha256>`. They are not
+committed: 24 MB per campaign that does not delta against the last one would
+grow every clone without bound, for a file most readers never fetch. A release
+asset costs neither repository size nor the site's 1 GB budget, and the 2 KB of
+provenance that says *which* binary a campaign ran stays here in the history
+where it belongs.
 
 ### The gzipped files
 
@@ -54,12 +61,22 @@ its two tables hold, so the database can be rebuilt from what is here.
 
 ## Reproducing a campaign
 
-Everything needed to re-run one byte-identically is in this repo. Take the
-`binary_sha256` from `data/campaigns.json`, and the binary is
-`binaries/<that sha>.stp`; `binaries/<that sha>.json` records the STP commit it
-was built from, the compiler, and every SAT solver library it was linked
-against — identified by hash, because several builds of one version can be
-present on a machine and only one of them was linked.
+Everything needed to re-run one byte-identically is published. Take the
+`binary_sha256` from `data/campaigns.json`; `binaries/<that sha>.json` records
+the STP commit it was built from, the compiler, every SAT solver library it was
+linked against — identified by hash, because several builds of one version can
+be present on a machine and only one of them was linked — and the
+`download_url` of the binary itself:
+
+```bash
+sha=$(python3 -c 'import json;print(json.load(open("data/campaigns.json"))[-1]["binary_sha256"])')
+url=$(python3 -c "import json;print(json.load(open('binaries/$sha.json'))['download_url'])")
+curl -sL -o stp "$url" && chmod +x stp
+echo "$sha  stp" | sha256sum -c        # it is the binary or it is not
+```
+
+That last line is the point of the hash. A binary that does not match is not
+the one the numbers came from, whatever it is.
 
 The corpora themselves are the public SMT-LIB non-incremental and incremental
 sets; `data/corpus.jsonl.gz` gives the sha256 of every file, so a local copy
@@ -81,8 +98,11 @@ routine, but it is the step that puts numbers in front of people, and a diff is
 the last chance to notice that a campaign is half-finished or that a mismatch
 went unremarked.
 
-`publish.py` runs `export.py`, copies in the binary after checking its hash
-against the one the campaign recorded, and repairs and re-keys the output log.
+`publish.py` runs `export.py`, attaches the binary to its release after
+checking its hash against the one the campaign recorded, and repairs and
+re-keys the output log. Re-running it on unchanged data produces byte-identical
+files, so a no-op publish shows an empty diff rather than a few megabytes of
+churn.
 It scrubs local paths out of everything — the provenance JSON records where the
 binary and each solver library sat on the build machine, and every output
 record carries the absolute path of its input — then fails rather than pushing
