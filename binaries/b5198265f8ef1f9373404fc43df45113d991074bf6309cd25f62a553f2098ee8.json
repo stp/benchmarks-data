@@ -6,9 +6,11 @@
   "commit_sha": "cf06c295d99db602a89c08d1e13c574a2f1b0f11",
   "compile_defines": "-DNDEBUG -D__STDC_LIMIT_MACROS -DLIN64 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8 -DSIZEOF_INT=4 -DUSE_CADICAL -DSTP_CADICAL_HAS_FACTOR -DSTP_HAVE_LIBBF",
   "dirty": true,
+  "download_url": "https://github.com/stp/benchmarks-data/releases/download/binary-b5198265f8ef/stp-b5198265f8ef",
   "has_fp": false,
   "has_libbf": true,
   "provenance_method": "version-string+cmakecache",
+  "size_bytes": 24443432,
   "solvers": {
     "cadical": {
       "git_describe": "rel-3.0.1",

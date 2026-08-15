@@ -34,6 +34,8 @@ import sqlite3
 import statistics
 import sys
 
+import outputlog
+
 DEFAULT_DB = os.path.expanduser("~/data/stpbench/results.db")
 
 # Classes that count as the solver having decided the instance.
@@ -175,7 +177,7 @@ def export_campaign(conn, camp, out_dir, want_detail):
                             r["peak_rss_kb"]] for r in rows]}
         p = os.path.join(out_dir, "detail", f"{name}.json.gz")
         os.makedirs(os.path.dirname(p), exist_ok=True)
-        with gzip.open(p, "wt", encoding="utf-8") as fh:
+        with outputlog.open_deterministic(p) as fh:
             json.dump(detail, fh, separators=(",", ":"))
     return summary
 
@@ -188,7 +190,7 @@ def _write_jsonl_gz(path, meta, rows):
     file streams, and so appending a campaign never rewrites an existing one.
     """
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with gzip.open(path, "wt", encoding="utf-8") as fh:
+    with outputlog.open_deterministic(path) as fh:
         fh.write(json.dumps(meta, separators=(",", ":"), sort_keys=True) + "\n")
         for r in rows:
             fh.write(json.dumps(r, separators=(",", ":")) + "\n")

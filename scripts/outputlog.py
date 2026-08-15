@@ -19,11 +19,26 @@ from compounding the next time a campaign resumes.
 """
 
 import gzip
+import io
 import json
 import os
 import zlib
 
 MAGIC = b"\x1f\x8b\x08"
+
+
+def open_deterministic(path):
+    """Text-mode gzip writer whose bytes depend only on the content.
+
+    Plain `gzip.open` stamps the current time and the source filename into the
+    header, so re-exporting unchanged data produces a different file every
+    time. In a git repository that turns "nothing changed" into a multi-megabyte
+    diff, and the churn is indistinguishable from real new data.
+    """
+    fh = open(path, "wb")
+    gz = gzip.GzipFile(filename="", mode="wb", compresslevel=9, fileobj=fh,
+                       mtime=0)
+    return io.TextIOWrapper(gz, encoding="utf-8", write_through=True)
 
 
 def _members(data):
@@ -125,7 +140,7 @@ def repair(path):
         return None
     records, stats = read_recovered(path)
     tmp = path + ".repair"
-    with gzip.open(tmp, "wt", encoding="utf-8") as fh:
+    with open_deterministic(tmp) as fh:
         for r in records:
             fh.write(json.dumps(r) + "\n")
     os.replace(tmp, path)

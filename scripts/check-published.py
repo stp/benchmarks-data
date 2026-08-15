@@ -37,16 +37,34 @@ def main():
             if not os.path.exists(os.path.join(REPO, rel)):
                 errs.append(f"{name}: campaigns.json names it, but {rel} is missing")
 
+        # The binary lives on a release, so what has to be here is the
+        # provenance that identifies it and says where to fetch it. A campaign
+        # naming a binary nobody can locate is not reproducible, which is the
+        # one property the whole provenance apparatus exists to provide.
         sha = c.get("binary_sha256")
-        if sha and not os.path.exists(os.path.join(REPO, "binaries", f"{sha}.stp")):
-            errs.append(f"{name}: binary {sha[:12]} is not in binaries/")
+        if sha:
+            prov_path = os.path.join(REPO, "binaries", f"{sha}.json")
+            if not os.path.exists(prov_path):
+                errs.append(f"{name}: no binaries/{sha[:12]}….json for the "
+                            "binary it names")
+            else:
+                with open(prov_path) as fh:
+                    prov = json.load(fh)
+                if not prov.get("download_url"):
+                    errs.append(f"{name}: binaries/{sha[:12]}….json has no "
+                                "download_url, so the binary cannot be found")
+                elif prov.get("binary_sha256") != sha:
+                    errs.append(f"{name}: binaries/{sha[:12]}….json records a "
+                                "different binary than the campaign did")
 
     # Every gzipped file must read through plain gzip. An output log appended
     # to across a crash does not, and that is exactly the state this repo must
     # never publish.
-    for root, _dirs, files in os.walk(REPO):
-        if ".git" in root:
-            continue
+    for root, dirs, files in os.walk(REPO):
+        # Prune rather than filter: a scan that walks into .git reads pack
+        # files, and one that walks into __pycache__ reports byte-compiled
+        # copies of these very scripts as path leaks.
+        dirs[:] = [d for d in dirs if d not in (".git", "__pycache__")]
         for f in files:
             if not f.endswith(".gz"):
                 continue
@@ -59,9 +77,11 @@ def main():
                 errs.append(f"{os.path.relpath(p, REPO)}: not readable as gzip ({e})")
 
     # Belt to publish.py's braces.
-    for root, _dirs, files in os.walk(REPO):
-        if ".git" in root:
-            continue
+    for root, dirs, files in os.walk(REPO):
+        # Prune rather than filter: a scan that walks into .git reads pack
+        # files, and one that walks into __pycache__ reports byte-compiled
+        # copies of these very scripts as path leaks.
+        dirs[:] = [d for d in dirs if d not in (".git", "__pycache__")]
         for f in files:
             if f.endswith(".stp"):
                 continue
